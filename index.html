@@ -880,7 +880,7 @@ td.act{width:1%;text-align:right;white-space:nowrap}
 .basepick svg{width:15px;height:15px;color:var(--muted)}
 .basepick select{border:0;background:none;font:600 13px var(--body);color:var(--ink);padding:0 2px;cursor:pointer;outline:none}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
-.legend .lg-on{background:#3ee07f;box-shadow:0 0 0 1.5px #05090d} .legend .lg-off{background:#ffb21e;box-shadow:0 0 0 1.5px #05090d}
+.legend .lg-on{background:#3ee07f;box-shadow:0 0 0 1.5px #05090d} .legend .lg-off{background:#ff3b3b;box-shadow:0 0 0 1.5px #05090d}
 .mapbox{position:relative}
 #map{height:min(68vh,620px);min-height:320px;background:#0e1419;border-radius:0 0 var(--r) var(--r);z-index:0}
 .map-note{position:absolute;left:10px;right:10px;bottom:10px;z-index:500;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12.5px;color:var(--muted)}
@@ -1041,7 +1041,7 @@ td.act{width:1%;text-align:right;white-space:nowrap}
     </section>
   </div>
 
-  <p class="foot">Source : OurAirports (domaine public), données du 18/10/2026, hors héliports, ballons et terrains fermés. Fonds de carte © CARTO et contributeurs OpenStreetMap. Connecté avec Google, tout est enregistré en ligne et synchronisé sur vos appareils. <span class="num" id="buildTag">Version 2026.11.04-1735</span></p>
+  <p class="foot">Source : OurAirports (domaine public), données du 18/10/2026, hors héliports, ballons et terrains fermés. Fonds de carte © CARTO et contributeurs OpenStreetMap. Connecté avec Google, tout est enregistré en ligne et synchronisé sur vos appareils. <span class="num" id="buildTag">Version 2026.11.04-1744</span></p>
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
@@ -1212,7 +1212,7 @@ onAuthStateChanged(auth, user => {
 <script>
 (() => {
   const PAGE = 300;
-  const BUILD = '2026.11.04-1735';
+  const BUILD = '2026.11.04-1744';
   const $ = (s, r = document) => r.querySelector(s);
   const fmt = n => n.toLocaleString('fr-FR');
   const pctTxt = (a, b) => (b ? (a / b * 100) : 0).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -1495,7 +1495,7 @@ onAuthStateChanged(auth, user => {
     return leafletLoading;
   }
   // Points de la carte : couleurs vives sur fond sombre, taille selon le zoom
-  const PIN_ON = '#3ee07f', PIN_OFF = '#ffb21e', PIN_EDGE = '#05090d';
+  const PIN_ON = '#3ee07f', PIN_OFF = '#ff3b3b', PIN_EDGE = '#05090d';
   function pinRadius(on) {
     const z = map ? map.getZoom() : 5;
     const r = z <= 3 ? 1.8 : z === 4 ? 2.2 : z === 5 ? 2.7 : z === 6 ? 3.3 : z === 7 ? 4 : z === 8 ? 4.8 : z === 9 ? 5.5 : 6.5;
