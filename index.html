@@ -719,6 +719,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 html{-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--body);-webkit-text-size-adjust:100%;overflow-x:clip;margin:0}
 button,input,select{font:inherit;color:inherit}
+select option,select optgroup{background-color:var(--card);color:var(--ink)}
+select optgroup{color:var(--muted);font-weight:700}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .num{font-variant-numeric:tabular-nums}
@@ -1041,7 +1043,7 @@ td.act{width:1%;text-align:right;white-space:nowrap}
     </section>
   </div>
 
-  <p class="foot">Source : OurAirports (domaine public), données du 18/10/2026, hors héliports, ballons et terrains fermés. Fonds de carte © CARTO et contributeurs OpenStreetMap. Version de démonstration : les coches restent sur cet appareil. <span class="num" id="buildTag">Version 2026.11.04-1744</span></p>
+  <p class="foot">Source : OurAirports (domaine public), données du 18/10/2026, hors héliports, ballons et terrains fermés. Fonds de carte © CARTO et contributeurs OpenStreetMap. Version de démonstration : les coches restent sur cet appareil. <span class="num" id="buildTag">Version 2026.11.04-1751</span></p>
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
@@ -1133,7 +1135,7 @@ try { if (!localStorage.getItem("carnet-aerodromes-v1")) localStorage.setItem("c
 <script>
 (() => {
   const PAGE = 300;
-  const BUILD = '2026.11.04-1744';
+  const BUILD = '2026.11.04-1751';
   const $ = (s, r = document) => r.querySelector(s);
   const fmt = n => n.toLocaleString('fr-FR');
   const pctTxt = (a, b) => (b ? (a / b * 100) : 0).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
