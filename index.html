@@ -974,6 +974,9 @@ td.act{width:1%;text-align:right;white-space:nowrap}
 .wlegend{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 14px;font-size:12px;color:var(--muted)}
 .wlegend i{display:inline-block;width:18px;height:10px;border-radius:2px}
 .wlegend .sp{flex:1}
+.wlegend .gauge{width:14px;height:18px;border:1.5px solid #6b7c8f;border-radius:3px;position:relative;overflow:hidden;flex:none}
+.wlegend .gauge i{position:absolute;left:0;right:0;bottom:0;height:45%;width:auto;border-radius:0;background:var(--pin-on,#3ee07f)}
+.phead{padding:10px 16px 0;font-size:12.5px;color:var(--muted)}
 .recent{list-style:none;margin:0;padding:4px 6px 8px}
 .recent li{display:grid;grid-template-columns:4.4em minmax(0,1fr) auto;align-items:center;gap:2px 10px;padding:7px 8px;border-radius:8px}
 .recent li:hover{background:var(--field)}
@@ -1108,10 +1111,10 @@ td.act{width:1%;text-align:right;white-space:nowrap}
       <button type="button" role="tab" data-tab="stats" aria-selected="false" aria-controls="pStats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg>Stats</button>
     </div>
     <div class="ppane" id="pWorld" role="tabpanel" hidden>
-      <div class="wlegend"><span>0 %</span><i style="background:#3a4654"></i><i style="background:#1f5a3a"></i><i style="background:#25784a"></i><i style="background:#2f9a57"></i><i style="background:#43bf6b"></i><i style="background:#7cf09c"></i><span>100 %</span><span class="sp"></span><span>Touchez un pays pour l'ouvrir</span></div>
+      <div class="wlegend"><span class="gauge"><i></i></span><span>Chaque pays se remplit du bas vers le haut selon votre progression</span><span class="sp"></span><span>Touchez un pays pour l'ouvrir</span></div>
       <div id="worldMap" role="region" aria-label="Carte du monde par pays"></div>
     </div>
-    <div class="ppane" id="pRecent" role="tabpanel" hidden><ul class="recent" id="recentList"></ul></div>
+    <div class="ppane" id="pRecent" role="tabpanel" hidden><p class="phead">Derniers aéroports cochés, du plus récent au plus ancien</p><ul class="recent" id="recentList"></ul></div>
     <div class="ppane" id="pStats" role="tabpanel" hidden><div id="statsBody"></div></div>
   </section>
 
@@ -1129,7 +1132,7 @@ td.act{width:1%;text-align:right;white-space:nowrap}
     </section>
   </div>
 
-  <p class="foot">Source : OurAirports (domaine public), données du 18/10/2026, hors héliports, ballons et terrains fermés. Fonds de carte © CARTO et contributeurs OpenStreetMap. Version de démonstration : les coches restent sur cet appareil. <span class="num" id="buildTag">Version 2026.11.04-1802</span></p>
+  <p class="foot">Source : OurAirports (domaine public), données du 18/10/2026, hors héliports, ballons et terrains fermés. Fonds de carte © CARTO et contributeurs OpenStreetMap. Version de démonstration : les coches restent sur cet appareil. <span class="num" id="buildTag">Version 2026.11.04-1808</span></p>
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
@@ -1232,7 +1235,7 @@ try { if (!localStorage.getItem("carnet-aerodromes-v1")) localStorage.setItem("c
 <script>
 (() => {
   const PAGE = 300;
-  const BUILD = '2026.11.04-1802';
+  const BUILD = '2026.11.04-1808';
   const $ = (s, r = document) => r.querySelector(s);
   const fmt = n => n.toLocaleString('fr-FR');
   const pctTxt = (a, b) => (b ? (a / b * 100) : 0).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -1528,6 +1531,7 @@ try { if (!localStorage.getItem("carnet-aerodromes-v1")) localStorage.setItem("c
     document.documentElement.style.setProperty('--pin-off', PIN_OFF);
     if (save) try { localStorage.setItem(LS + '-couleurs', JSON.stringify({ on: PIN_ON, off: PIN_OFF })); } catch (e) {}
     if (current) { const s = st(current.c); markers.forEach(({ m, r }) => m.setStyle(styleFor(s.checked.has(r.k)))); }
+    if (world && worldFc && tab === 'world') buildWorldFill(worldFc);
     document.querySelectorAll('.sw').forEach(sw => {
       const cur = sw.dataset.for === 'on' ? PIN_ON : PIN_OFF;
       sw.innerHTML = PALETTE.map(c => `<button type="button" style="background:${c}" data-c="${c}" aria-pressed="${c.toLowerCase() === cur.toLowerCase()}" aria-label="Couleur ${c}"></button>`).join('')
@@ -1602,8 +1606,8 @@ try { if (!localStorage.getItem("carnet-aerodromes-v1")) localStorage.setItem("c
     cvoyage: { carto: 'voyager',   bg: '#f2efe9' },
     osm:     { bg: '#e8e4dc' }
   };
-  let baseKey = 'cnoir';
-  try { const k = localStorage.getItem(LS + '-fond'); if (BASES[k]) baseKey = k; } catch (e) {}
+  let baseKey = 'csil';
+  try { const k = localStorage.getItem(LS + '-fond2'); if (BASES[k]) baseKey = k; } catch (e) {}
   function showMapNote(t) { $('#mapNote').hidden = false; $('#mapNote').textContent = t; }
 
   // CARTO vectoriel (MapLibre) : on retire limites de régions/départements et toponymes
@@ -1693,8 +1697,8 @@ try { if (!localStorage.getItem("carnet-aerodromes-v1")) localStorage.setItem("c
   }
   const mainBase = { map: null, layer: null, get el() { return $('#map'); }, note: showMapNote };
   function setBase(key) {
-    if (!BASES[key]) key = 'cnoir';
-    baseKey = key; try { localStorage.setItem(LS + '-fond', key); } catch (e) {}
+    if (!BASES[key]) key = 'csil';
+    baseKey = key; try { localStorage.setItem(LS + '-fond2', key); } catch (e) {}
     renderBaseMenu();
     if (map) { $('#mapNote').hidden = true; mainBase.map = map; applyBase(mainBase, key); }
     if (world) applyBase(worldBase, key);
@@ -1793,7 +1797,7 @@ try { if (!localStorage.getItem("carnet-aerodromes-v1")) localStorage.setItem("c
   }
   $('#statsBody').addEventListener('click', e => { const b = e.target.closest('[data-sp]'); if (b) { if (view.mode !== 'list') setMode('list'); select(b.dataset.sp); $('#country').scrollIntoView({ block: 'start' }); } });
 
-  function worldColor(p) {
+  function worldColor_unused(p) {
     if (!p) return null;
     const t = totalOf(p), c = checkedOf(p); if (!t) return null;
     if (!c) return '#3a4654';
@@ -1818,6 +1822,50 @@ try { if (!localStorage.getItem("carnet-aerodromes-v1")) localStorage.setItem("c
     })().catch(e => { geoReady = null; throw e; });
     return geoReady;
   }
+  // Remplissage « jauge » : chaque morceau de pays est coloré depuis son bas jusqu'à la hauteur de la progression
+  const mercY = lat => Math.log(Math.tan(Math.PI / 4 + Math.max(-85, Math.min(85, lat)) * Math.PI / 360));
+  const latOf = y => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) * 180 / Math.PI;
+  function clipBelow(ring, T) {   // garde la partie du contour située sous la latitude T
+    const out = [];
+    for (let i = 0; i < ring.length; i++) {
+      const a = ring[i], b = ring[(i + 1) % ring.length], ai = a[1] <= T, bi = b[1] <= T;
+      if (ai) out.push(a);
+      if (ai !== bi) { const t = (T - a[1]) / (b[1] - a[1]); out.push([a[0] + t * (b[0] - a[0]), T]); }
+    }
+    return out.length > 2 ? out : null;
+  }
+  function fillPolys(f, ratio) {
+    const g = f.geometry; if (!g) return [];
+    const polys = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+    const out = [];
+    for (const poly of polys) {
+      let lo = Infinity, hi = -Infinity;
+      for (const [, la] of poly[0]) { if (la < lo) lo = la; if (la > hi) hi = la; }
+      if (ratio >= 1) { out.push(poly); continue; }
+      const T = latOf(mercY(lo) + (mercY(hi) - mercY(lo)) * ratio);
+      const rings = poly.map(r => clipBelow(r, T)).filter(Boolean);
+      if (rings.length && rings[0]) out.push(rings);
+    }
+    return out;
+  }
+  let worldFill = null;
+  function buildWorldFill(fc) {
+    if (worldFill) world.removeLayer(worldFill);
+    const feats = [];
+    for (const f of fc.features) {
+      const p = byIso.get(f.iso); if (!p) continue;
+      const t = totalOf(p), c = checkedOf(p); if (!c || !t) continue;
+      const ratio = c >= t ? 1 : Math.max(.04, c / t);   // un minimum visible dès le premier aéroport
+      const polys = fillPolys(f, ratio); if (!polys.length) continue;
+      feats.push({ type: 'Feature', properties: {}, geometry: { type: 'MultiPolygon', coordinates: polys } });
+    }
+    worldFill = L.geoJSON({ type: 'FeatureCollection', features: feats }, {
+      renderer: worldRenderer, interactive: false,
+      style: () => ({ fillColor: PIN_ON, fillOpacity: .9, stroke: false })
+    }).addTo(world);
+    if (worldGeo) worldGeo.bringToFront();
+  }
+  let worldRenderer = null, worldFc = null;
   async function renderWorld() {
     try { await loadLeaflet(); } catch (e) { return; }
     if (!world) {
@@ -1825,22 +1873,23 @@ try { if (!localStorage.getItem("carnet-aerodromes-v1")) localStorage.setItem("c
       world.attributionControl.setPrefix(false);
       world.setView([25, 10], world.getSize().x < 500 ? 1 : 2);
       worldBase.map = world; applyBase(worldBase, baseKey);
+      worldRenderer = L.canvas({ padding: .2, tolerance: 2 });
       try {
-        const fc = await loadGeo();
-        worldGeo = L.geoJSON(fc, {
-          renderer: L.canvas({ padding: .2, tolerance: 2 }),
-          style: f => { const col = worldColor(byIso.get(f.iso)); return col ? { fillColor: col, fillOpacity: col === '#3a4654' ? .45 : .85, color: '#0b0f14', weight: .5 } : { fillOpacity: 0, opacity: 0 }; },
+        worldFc = await loadGeo();
+        worldGeo = L.geoJSON(worldFc, {
+          renderer: worldRenderer,
+          style: f => byIso.get(f.iso) ? { color: '#7d8fa3', weight: .7, opacity: .9, fillColor: '#000', fillOpacity: .01 } : { stroke: false, fillOpacity: 0 },
           onEachFeature: (f, l) => {
             const p = byIso.get(f.iso); if (!p) return;
             l.bindTooltip(() => `<b>${esc(p.n)}</b><br>${fmt(checkedOf(p))} / ${fmt(totalOf(p))} · ${pctTxt(checkedOf(p), totalOf(p))} %`, { sticky: true, direction: 'top' });
             l.on('click', () => { if (view.mode !== 'list') setMode('list'); select(p.c); $('#country').scrollIntoView({ block: 'start', behavior: 'smooth' }); });
           }
         }).addTo(world);
-        worldGeo.options.attribution = 'Frontières : Natural Earth'; world.attributionControl.addAttribution('Frontières : Natural Earth');
+        world.attributionControl.addAttribution('Frontières : Natural Earth');
       } catch (e) { $('#worldMap').insertAdjacentHTML('beforeend', '<div class="map-note">Contours des pays indisponibles : vérifiez la connexion internet.</div>'); }
     }
     world.invalidateSize();
-    if (worldGeo) worldGeo.setStyle(f => { const col = worldColor(byIso.get(f.iso)); return col ? { fillColor: col, fillOpacity: col === '#3a4654' ? .45 : .85, color: '#0b0f14', weight: .5, opacity: 1 } : { fillOpacity: 0, opacity: 0 }; });
+    if (worldFc) buildWorldFill(worldFc);
   }
 
   // ---------- Feuille Ajouter / Modifier ----------
