@@ -1,6 +1,6 @@
 {
-  "name": "Carnet des aérodromes",
-  "short_name": "Aérodromes",
+  "name": "Carnet des aérodromes (DÉMO)",
+  "short_name": "Démo aérodromes",
   "description": "Suivi de ma collection d'aéroports et d'aérodromes : 239 pays, cases à cocher, carte et export CSV.",
   "lang": "fr",
   "start_url": "./",
